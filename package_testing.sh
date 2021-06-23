@@ -1,9 +1,50 @@
 #!/bin/zsh
 
 # conan remove Clang
-conda activate base && \
+
+# build Clang
+rm build && \
+conan export . && \
+conan install . --install-folder build && \
+conan source . --source-folder src --install-folder build && \
+conan build . --build-folder build --source-folder src && \
+conan export-pkg . Clang/12.0.0 --build-folder=build -f
+
+conan build . --build-folder build --source-folder src
+
+# build Halide
+rm build && \
 conan export . demo/testing && \
-conan install . --install-folder build_debug -s build_type=Debug && \
-conan source . --source-folder src --install-folder build_debug && \
-conan build . --build-folder build_debug --source-folder src && \
-conan export-pkg . Halide/12.0.0@demo/testing --build-folder=build_debug -s build_type=Debug -f
+conan install . --install-folder build && \
+conan source . --source-folder src --install-folder build && \
+conan build . --build-folder build --source-folder src && \
+conan export-pkg . Halide/12.0.0 --build-folder=build -f
+
+
+cmake -DCMAKE_BUILD_TYPE=Release \
+        -DLLVM_ENABLE_PROJECTS="clang" \
+        -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64" \
+        -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ASSERTIONS=ON \
+        -DLLVM_ENABLE_EH=OFF -DLLVM_ENABLE_RTTI=OFF -DLLVM_BUILD_32_BITS=OFF \
+        -S ../src/llvm-project/llvm
+
+cmake -DCMAKE_BUILD_TYPE=Release \
+        -DTARGETS_TO_BUILD="X86;ARM;AArch64" \
+        -DLLVM_ENABLE_TERMINFO=OFF -DLLVM_ENABLE_ASSERTIONS=ON \
+        -DLLVM_ENABLE_EH=OFF -DLLVM_ENABLE_RTTI=OFF -DLLVM_BUILD_32_BITS=OFF \
+        -S ../src/llvm-project/llvm
+
+export LLVM_ROOT=/root/.conan/data/Clang/12.0.0/Clang/12.0.0/package/9cbb564335d33997e881fa20034d7c64606cc51b
+export LLVM_CONFIG=${LLVM_ROOT}/bin/llvm-config
+cmake -S ../src/Halide \
+-DWITH_TESTS=True \
+-DWITH_TUTORIALS=False \
+-DWITH_PYTHON_BINDINGS=False \
+-DWITH_WASM_SHELL=False \
+-DWITH_WABT=False \
+-DTARGET_WEBASSEMBLY=False \
+-DLLVM_DIR=/root/.conan/data/Clang/12.0.0/Clang/12.0.0/package/9cbb564335d33997e881fa20034d7c64606cc51b/lib/cmake/llvm \
+-DCMAKE_EXPORT_COMPILE_COMMANDS=True
+# 手动build 成功
+
+#  /root/.conan/data/Clang/12.0.0/Clang/12.0.0/package/9cbb564335d33997e881fa20034d7c64606cc51b/lib/cmake/clang/ClangConfig.cmake

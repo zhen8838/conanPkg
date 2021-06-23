@@ -4,3 +4,4 @@ HalidePkg/package*
 ClangPkg/build*
 ClangPkg/src*
 ClangPkg/package*
+.vscode

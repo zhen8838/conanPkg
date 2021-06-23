@@ -1,5 +1,5 @@
 from conans import ConanFile, CMake, tools
-
+import os.path
 
 class HalideConan(ConanFile):
   name = "Halide"
@@ -19,7 +19,7 @@ class HalideConan(ConanFile):
       'build_webassembly': [True, False]
   }
   halide_default_options = {
-      'build_tests': False,
+      'build_tests': True,
       'build_tutorials': False,
       'build_python_bindings': False,
       'build_wasm_shell': False,
@@ -27,37 +27,24 @@ class HalideConan(ConanFile):
       'build_webassembly': False
   }
   options = {"shared": [True, False], "fPIC": [True, False], **halide_options}
-  default_options = {"shared": False, "fPIC": True, **halide_default_options}
+  default_options = {"shared": True, "fPIC": True, **halide_default_options}
   generators = ["cmake", "cmake_find_package", "cmake_paths"]
-  requires = ["Clang/12.0.0@demo/testing", "llvm-core/12.0.0"]
+  requires = ["Clang/12.0.0@Clang/12.0.0"]
 
   def config_options(self):
     if self.settings.os == "Windows":
       del self.options.fPIC
 
   def source(self):
-    git = tools.Git("Halide")
-    git.clone(url="https://gitee.com/mirrors/Halide.git",
-              branch="v12.0.0")
-    # inject llvm dep into halide
-    tools.replace_in_file("Halide/CMakeLists.txt",
-                          '''project(Halide
-        VERSION 12.0.0
-        DESCRIPTION "Halide compiler and libraries"
-        HOMEPAGE_URL "https://halide-lang.org")''',
-                          '''project(Halide
-        VERSION 12.0.0
-        DESCRIPTION "Halide compiler and libraries"
-        HOMEPAGE_URL "https://halide-lang.org")
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})''')
+    if os.path.exists(f'{self.source_folder}/Halide'):
+      return
+    self.run("git clone --depth=1 https://gitee.com/mirrors/Halide.git -b v12.0.0")
+    # NOTE don't inject llvm dep into halide, It will be generate huge error
 
   def cmake_configure(self):
     cmake = CMake(self)
-    if self.options.shared:
-      cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
+    # if self.options.shared:
+    #   cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
     # disable testing
     cmake.definitions["WITH_TESTS"] = self.options.build_tests
     cmake.definitions["WITH_TUTORIALS"] = self.options.build_tutorials
@@ -81,4 +68,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})''')
 
 
   def package_info(self):
-    self.cpp_info.libs = ["Halide"]
+    self.cpp_info.name = "Halide"
+    self.cpp_info.names["generator_name"] = "Halide"
+    self.cpp_info.resdirs = ['share/tools']

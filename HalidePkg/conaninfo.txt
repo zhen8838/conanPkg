@@ -11,7 +11,7 @@
 
 [options]
     fPIC=True
-    shared=False
+    shared=True
 
 [full_settings]
     arch=x86_64
@@ -26,7 +26,7 @@
 
 [full_options]
     fPIC=True
-    shared=False
+    shared=True
 
 [recipe_hash]
 
