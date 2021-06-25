@@ -29,7 +29,7 @@ class HalideConan(ConanFile):
   options = {"shared": [True, False], "fPIC": [True, False], **halide_options}
   default_options = {"shared": True, "fPIC": True, **halide_default_options}
   generators = ["cmake", "cmake_find_package", "cmake_paths"]
-  requires = ["Clang/12.0.0@Clang/12.0.0"]
+  requires = ["Clang/12.0.0"]
 
   def config_options(self):
     if self.settings.os == "Windows":

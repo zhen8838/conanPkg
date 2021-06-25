@@ -5,21 +5,26 @@ import os.path
 class ClangConan(ConanFile):
   name = "Clang"
   version = "12.0.0"
-  license = "<Put the package license here>"
+  license = "Apache-2.0 WITH LLVM-exception"
   author = "<Put your name here> <And your email here>"
-  url = "<Package recipe repository url here, for issues about the package>"
-  description = "<Description of Clang here>"
-  topics = ("<Put some tag here>", "<here>", "<and here>")
+  homepage = 'https://github.com/llvm/llvm-project/tree/master/llvm'
+  description = "Clang compiler"
+  topics = ('conan', 'llvm', 'clang')
   settings = ("os", "compiler", "build_type", "arch")
-  options = {"shared": [True, False], "fPIC": [True, False]}
-  default_options = {"shared": False, "fPIC": True}
+  options = {
+      "shared": [True, False],
+      "fPIC": [True, False],
+  }
+  default_options = {
+      "shared": True,
+      "fPIC": True}
 
-  exports_sources = ['CMakeLists.txt', 'patches/*']
+  exports_sources = ['CMakeLists.txt']
   generators = ['cmake', 'cmake_find_package']
   no_copy_source = True
 
   def requirements(self):
-    pass
+    self.requires('llvm-core/12.0.0')
 
   def config_options(self):
     if self.settings.os == "Windows":
@@ -32,15 +37,6 @@ class ClangConan(ConanFile):
 
   def _configure_cmake(self):
     cmake = CMake(self)
-    cmake.definitions['LLVM_ENABLE_PROJECTS'] = "clang"
-    cmake.definitions['LLVM_TARGETS_TO_BUILD'] = "X86;ARM;AArch64"
-    cmake.definitions['LLVM_ENABLE_TERMINFO']= False
-    cmake.definitions['LLVM_ENABLE_ASSERTIONS']= True
-    cmake.definitions['LLVM_ENABLE_EH']= False
-    cmake.definitions['LLVM_ENABLE_RTTI']= False
-    cmake.definitions['LLVM_BUILD_32_BITS']= False
-    # if self.options.shared:
-    #   cmake.definitions['LLVM_LINK_LLVM_DYLIB'] = True
     # cmake.definitions['CLANG_BUILD_EXAMPLES'] = self.options.build_examples
     # cmake.definitions['CLANG_BUILD_TOOLS'] = self.options.build_tools
     # cmake.definitions['CLANG_INCLUDE_DOCS'] = self.options.build_docs
@@ -53,15 +49,13 @@ class ClangConan(ConanFile):
 
   def build(self):
     cmake = self._configure_cmake()
-    cmake.configure(source_folder="llvm-project/llvm")
+    cmake.configure(source_folder="clang")
     cmake.build()
 
   def package(self):
     cmake = self._configure_cmake()
     cmake.install()
-    self.copy("*", dst="include", src="package/include", keep_path=True)
-    self.copy("*", dst="lib", src="package/lib", keep_path=True, symlinks=True)
-    self.copy("*", dst="bin", src="package/bin", keep_path=True, symlinks=True)
+    self.copy("*", dst="", src="package", keep_path=True)
 
   def package_info(self):
     self.cpp_info.name = "Clang"

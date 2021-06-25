@@ -1,7 +1,5 @@
-HalidePkg/build*
-HalidePkg/src*
-HalidePkg/package*
-ClangPkg/build*
-ClangPkg/src*
-ClangPkg/package*
+*/all/build
+*/all/src
+*/all/test_package/build
+*/all/log
 .vscode
