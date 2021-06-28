@@ -325,6 +325,13 @@ class LLVMCoreConan(ConanFile):
     }
 
     for lib, deps in components.items():
+      if lib in ['LLVMCFIVerify',
+                 'LLVMExegesisAArch64',
+                 'LLVMExegesisMips',
+                 'LLVMExegesisPowerPC',
+                 'LLVMExegesisX86',
+                 'LLVMExegesis', ]:  # do not need export this components
+        continue
       component = lib[4:].replace('LLVM', '').lower()
       # components.json没有捕捉到xml的依赖，手动添加
       if self.options.with_xml2 and component == 'windowsmanifest':

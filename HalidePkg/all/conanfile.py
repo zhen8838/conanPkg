@@ -72,6 +72,10 @@ class HalideConan(ConanFile):
   def package_info(self):
     self.cpp_info.name = "Halide"
     self.cpp_info.names["generator_name"] = "Halide"
+    self.cpp_info.names["cmake_find_package"] = "Halide"
+    self.cpp_info.names["cmake_find_package_multi"] = "Halide"
+    self.cpp_info.build_modules["cmake_find_package"] = ['lib/cmake/HalideHelpers/HalideHelpersConfig.cmake']
+    self.cpp_info.build_modules["cmake_find_package_multi"] = ['lib/cmake/HalideHelpers/HalideHelpersConfig.cmake']
     self.cpp_info.resdirs = ['share/tools']
     if self.settings.os == "Linux":
       self.cpp_info.system_libs = ["pthread"]
