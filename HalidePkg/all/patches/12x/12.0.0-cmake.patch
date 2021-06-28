@@ -1,0 +1,12 @@
+--- CMakeLists.txt	2021-06-28 16:00:47.981751445 +0800
++++ CMakeLists.txt	2021-06-28 16:03:18.940683279 +0800
+@@ -3,7 +3,8 @@
+         VERSION 12.0.0
+         DESCRIPTION "Halide compiler and libraries"
+         HOMEPAGE_URL "https://halide-lang.org")
+-
++include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
++conan_basic_setup()
+ enable_testing()
+ 
+ ##

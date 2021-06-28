@@ -14,12 +14,29 @@ class ClangConan(ConanFile):
   options = {
       "shared": [True, False],
       "fPIC": [True, False],
+      "build_examples": [True, False],
+      "build_tools": [True, False],
+      "build_docs": [True, False],
+      "build_tests": [True, False],
+      "enable_arcmt": [True, False],
+      "enable_proto_fuzzer": [True, False],
+      "enable_static_analyzer": [True, False],
+      "include_clang_tools_extra": [True, False],
   }
   default_options = {
-      "shared": True,
-      "fPIC": True}
+      "shared": False,
+      "fPIC": True,
+      "build_examples": False,
+      "build_tools": True,
+      "build_docs": False,
+      "build_tests": False,
+      "enable_arcmt": True,
+      "enable_proto_fuzzer": False,
+      "enable_static_analyzer": True,
+      "include_clang_tools_extra": False,
+  }
 
-  exports_sources = ['CMakeLists.txt']
+  exports_sources = ['CMakeLists.txt', 'patches/*']
   generators = ['cmake', 'cmake_find_package']
   no_copy_source = True
 
@@ -30,26 +47,35 @@ class ClangConan(ConanFile):
     if self.settings.os == "Windows":
       del self.options.fPIC
 
+  def _patch_sources(self):
+    for patch in self.conan_data.get('patches', {}).get(self.version, []):
+      tools.patch(**patch)
+
+  @property
+  def _source_subfolder(self):
+    return 'clang'
+
   def source(self):
-    if os.path.exists(f"{self.source_folder}/llvm-project"):
-      return
-    self.run("git clone --depth=1 https://gitee.com/mirrors/llvm-project.git -b llvmorg-12.0.0")
+    tools.get(**self.conan_data['sources'][self.version])
+    os.rename('clang-{}.src'.format(self.version), self._source_subfolder)
+    self._patch_sources()
 
   def _configure_cmake(self):
     cmake = CMake(self)
-    # cmake.definitions['CLANG_BUILD_EXAMPLES'] = self.options.build_examples
-    # cmake.definitions['CLANG_BUILD_TOOLS'] = self.options.build_tools
-    # cmake.definitions['CLANG_INCLUDE_DOCS'] = self.options.build_docs
-    # cmake.definitions['CLANG_INCLUDE_TESTS'] = self.options.build_tests
-    # cmake.definitions['CLANG_ENABLE_ARCMT'] = self.options.enable_arcmt
-    # cmake.definitions['CLANG_ENABLE_PROTO_FUZZER'] = self.options.enable_proto_fuzzer
-    # cmake.definitions['CLANG_ENABLE_STATIC_ANALYZER'] = self.options.enable_static_analyzer
-    # cmake.definitions['LIBCLANG_INCLUDE_CLANG_TOOLS_EXTRA'] = self.options.include_clang_tools_extra
+    cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
+    cmake.definitions['CLANG_BUILD_EXAMPLES'] = self.options.build_examples
+    cmake.definitions['CLANG_BUILD_TOOLS'] = self.options.build_tools
+    cmake.definitions['CLANG_INCLUDE_DOCS'] = self.options.build_docs
+    cmake.definitions['CLANG_INCLUDE_TESTS'] = self.options.build_tests
+    cmake.definitions['CLANG_ENABLE_ARCMT'] = self.options.enable_arcmt
+    cmake.definitions['CLANG_ENABLE_PROTO_FUZZER'] = self.options.enable_proto_fuzzer
+    cmake.definitions['CLANG_ENABLE_STATIC_ANALYZER'] = self.options.enable_static_analyzer
+    cmake.definitions['LIBCLANG_INCLUDE_CLANG_TOOLS_EXTRA'] = self.options.include_clang_tools_extra
     return cmake
 
   def build(self):
     cmake = self._configure_cmake()
-    cmake.configure(source_folder="clang")
+    cmake.configure(source_folder=self._source_subfolder)
     cmake.build()
 
   def package(self):
@@ -58,5 +84,5 @@ class ClangConan(ConanFile):
     self.copy("*", dst="", src="package", keep_path=True)
 
   def package_info(self):
-    self.cpp_info.name = "Clang"
-    self.cpp_info.names["generator_name"] = "Clang"
+    self.cpp_info.names["cmake_find_package"] = "Clang"
+    self.cpp_info.names["cmake_find_package_multi"] = "Clang"

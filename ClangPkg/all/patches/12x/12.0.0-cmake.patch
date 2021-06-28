@@ -1,0 +1,39 @@
+--- CMakeLists.txt	2021-04-07 00:38:18.000000000 +0800
++++ CMakeLists.txt	2021-06-25 17:35:13.880295559 +0800
+@@ -4,6 +4,13 @@
+ # standalone project, using LLVM as an external library:
+ if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
+   project(Clang)
++  
++  message(STATUS "Loading conan scripts for Clang dependencies...")# note need make patch
++
++  message(STATUS "Doing conan basic setup")
++  include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
++  conan_basic_setup()
++
+ 
+   set(CMAKE_CXX_STANDARD 14 CACHE STRING "C++ standard to conform to")
+   set(CMAKE_CXX_STANDARD_REQUIRED YES)
+@@ -64,6 +71,7 @@
+   endif()
+ 
+   find_package(LLVM REQUIRED HINTS "${LLVM_CMAKE_PATH}")
++
+   list(APPEND CMAKE_MODULE_PATH ${LLVM_DIR})
+ 
+   # We can't check LLVM_CONFIG here, because find_package(LLVM ...) also sets
+--- tools/c-index-test/CMakeLists.txt	2021-04-07 00:38:18.000000000 +0800
++++ tools/c-index-test/CMakeLists.txt	2021-06-25 20:30:18.377606156 +0800
+@@ -40,8 +40,10 @@
+ 
+ # If libxml2 is available, make it available for c-index-test.
+ if (CLANG_HAVE_LIBXML)
+-  if ((CMAKE_OSX_SYSROOT) AND (EXISTS ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR}))
+-    include_directories(SYSTEM ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR})
++  if (${CMAKE_OSX_SYSROOT})
++    if (EXISTS ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR})
++      include_directories(SYSTEM ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR})
++    endif()
+   else()
+     include_directories(SYSTEM ${LIBXML2_INCLUDE_DIR})
+   endif()

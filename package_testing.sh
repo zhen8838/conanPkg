@@ -51,18 +51,13 @@ cmake -S ../src/llvm-project/ \
 -DCLANG_PLUGIN_SUPPORT=False \
 -DCMAKE_BUILD_TYPE=Release 
 
-
+# -------------------
 # make llvm-core package
 rm build
 conan export . 12.0.0@ && \
 conan install . 12.0.0@ --install-folder build && \
 conan source . --source-folder src --install-folder build && \
-conan build . --build-folder build --source-folder src --configure && \
 conan build . --build-folder build --source-folder src && \
-
-conan package . --build-folder build --package-folder=build/package > log
-
 conan export-pkg . 12.0.0@ --build-folder build
-conan export-pkg . 12.0.0@ --package-folder=build/package -f
 
-# conan export . 12.0.0@
+# make clang package

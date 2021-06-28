@@ -1,14 +1,13 @@
 from conans import ConanFile, CMake, tools
 import os.path
+import shutil
+
 
 class HalideConan(ConanFile):
   name = "Halide"
   version = "12.0.0"
-  license = "<Put the package license here>"
   author = "zhengqihang"
-  url = "<Package recipe repository url here, for issues about the package>"
-  description = "<Description of Halide here>"
-  topics = ("<Put some tag here>", "<here>", "<and here>")
+  topics = ("image-processing", "compiler", "dsl")
   settings = "os", "compiler", "build_type", "arch"
   halide_options = {
       'build_tests': [True, False],
@@ -29,23 +28,29 @@ class HalideConan(ConanFile):
   options = {"shared": [True, False], "fPIC": [True, False], **halide_options}
   default_options = {"shared": True, "fPIC": True, **halide_default_options}
   generators = ["cmake", "cmake_find_package", "cmake_paths"]
-  requires = ["Clang/12.0.0"]
+  exports_sources = ['CMakeLists.txt', 'patches/*']
+  requires = ["Clang/12.0.0", "llvm-core/12.0.0", "libjpeg/9c", 'libpng/1.6.37', 'opengl/system']
 
   def config_options(self):
     if self.settings.os == "Windows":
       del self.options.fPIC
 
+  def _patch_sources(self):
+    for patch in self.conan_data.get('patches', {}).get(self.version, []):
+      tools.patch(**patch)
+
+  @property
+  def _source_subfolder(self):
+    return 'Halide'
+
   def source(self):
-    if os.path.exists(f'{self.source_folder}/Halide'):
-      return
-    self.run("git clone --depth=1 https://gitee.com/mirrors/Halide.git -b v12.0.0")
-    # NOTE don't inject llvm dep into halide, It will be generate huge error
+    tools.get(**self.conan_data['sources'][self.version])
+    os.rename(f'Halide-{self.version}', self._source_subfolder)
+    self._patch_sources()
 
   def cmake_configure(self):
     cmake = CMake(self)
-    # if self.options.shared:
-    #   cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
-    # disable testing
+    cmake.definitions["BUILD_SHARED_LIBS"] = self.options.shared
     cmake.definitions["WITH_TESTS"] = self.options.build_tests
     cmake.definitions["WITH_TUTORIALS"] = self.options.build_tutorials
     cmake.definitions["WITH_PYTHON_BINDINGS"] = self.options.build_python_bindings
@@ -56,18 +61,17 @@ class HalideConan(ConanFile):
 
   def build(self):
     cmake = self.cmake_configure()
-    cmake.configure(source_folder="Halide")
+    cmake.configure(source_folder=self._source_subfolder)
     cmake.build()
 
   def package(self):
     cmake = self.cmake_configure()
     cmake.install()
-    self.copy("*", dst="include", src="package/include", keep_path=True)
-    self.copy("*", dst="lib", src="package/lib", keep_path=True, symlinks=True)
-    self.copy("*", dst="share", src="package/share", keep_path=True, symlinks=True)
-
+    self.copy("*", dst="", src="package", keep_path=True)
 
   def package_info(self):
     self.cpp_info.name = "Halide"
     self.cpp_info.names["generator_name"] = "Halide"
     self.cpp_info.resdirs = ['share/tools']
+    if self.settings.os == "Linux":
+      self.cpp_info.system_libs = ["pthread"]
