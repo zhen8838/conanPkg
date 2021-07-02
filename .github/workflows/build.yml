@@ -36,10 +36,20 @@ jobs:
         conan config set general.cmake_generator=Ninja
 
     - name: Build Package & Upload
+      if: runner.os == 'Linux'
       shell: bash
       env: 
         CC: gcc-10
         CXX: g++-10
+        CONAN_LOGIN_USERNAME: zhen8838
+        CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        CONAN_UPLOAD: https://conan.sunnycase.moe
+      run: python build.py
+
+    - name: Build Package & Upload
+      if: runner.os != 'Linux'
+      shell: bash
+      env: 
         CONAN_LOGIN_USERNAME: zhen8838
         CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
         CONAN_UPLOAD: https://conan.sunnycase.moe
