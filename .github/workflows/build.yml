@@ -1,0 +1,47 @@
+name: build
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+  NNCASE_VERSION_SUFFIX: .dev${{github.run_number}}
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04,windows-2019,macos-10.15]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Add msbuild to PATH
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1.9.0
+          
+    - name: Setup Python
+      uses: actions/setup-python@v2.2.1
+      with:
+        python-version: 3.7
+
+    - name: Install Conan
+      shell: bash
+      run: |
+        pip install conan conan-package-tools
+
+    - name: Configure Conan Profile
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        conan profile new default --detect
+        conan config set general.cmake_generator=Ninja
+
+    - name: Build Package & Upload
+      shell: bash
+      env: 
+        CONAN_USERNAME: zhen8838
+        CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        CONAN_UPLOAD: https://conan.sunnycase.moe
+      run: python build.py
