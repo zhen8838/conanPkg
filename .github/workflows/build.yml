@@ -38,6 +38,8 @@ jobs:
     - name: Build Package & Upload
       shell: bash
       env: 
+        CC: gcc-10
+        CXX: g++-10
         CONAN_LOGIN_USERNAME: zhen8838
         CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
         CONAN_UPLOAD: https://conan.sunnycase.moe
