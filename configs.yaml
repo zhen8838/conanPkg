@@ -25,23 +25,23 @@ packages:
       build_all_options_values: 
         - flatbuffers:options_from_context
 
-  - package_configs:
-      <<: *default_package_configs
-      conanfile: LLVM_corePkg/all/conanfile.py
-      reference: llvm-core/12.0.0@
-    common_build_configs: 
-      <<: *default_common_build_configs
+  # - package_configs:
+  #     <<: *default_package_configs
+  #     conanfile: LLVM_corePkg/all/conanfile.py
+  #     reference: llvm-core/12.0.0@
+  #   common_build_configs: 
+  #     <<: *default_common_build_configs
 
-  - package_configs:
-      <<: *default_package_configs
-      conanfile: ClangPkg/all/conanfile.py
-      reference: Clang/12.0.0@
-    common_build_configs: 
-      <<: *default_common_build_configs  
+  # - package_configs:
+  #     <<: *default_package_configs
+  #     conanfile: ClangPkg/all/conanfile.py
+  #     reference: Clang/12.0.0@
+  #   common_build_configs: 
+  #     <<: *default_common_build_configs  
 
-  - package_configs:
-      <<: *default_package_configs
-      conanfile: HalidePkg/all/conanfile.py
-      reference: Halide/12.0.0@
-    common_build_configs: 
-      <<: *default_common_build_configs
+  # - package_configs:
+  #     <<: *default_package_configs
+  #     conanfile: HalidePkg/all/conanfile.py
+  #     reference: Halide/12.0.0@
+  #   common_build_configs: 
+  #     <<: *default_common_build_configs
