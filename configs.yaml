@@ -1,0 +1,34 @@
+-
+  conanfile: flatbuffersPkg/all/conanfile.py
+  reference: flatbuffers/2.0.0@
+  build_configs:
+    - 
+      settings: null
+      options:
+        flatbuffers:options_from_context: True
+      env_vars: null
+      build_requires: null
+    - 
+      settings: null
+      options:
+        flatbuffers:options_from_context: False
+      env_vars: null
+      build_requires: null
+-
+  conanfile: LLVM_corePkg/all/conanfile.py
+  reference: llvm-core/12.0.0@
+  build_configs:
+    - 
+      null
+-
+  conanfile: ClangPkg/all/conanfile.py
+  reference: Clang/12.0.0@
+  build_configs:
+    - 
+      null
+-
+  conanfile: HalidePkg/all/conanfile.py
+  reference: Halide/12.0.0@
+  build_configs:
+    - 
+      null

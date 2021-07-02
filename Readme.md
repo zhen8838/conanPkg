@@ -4,9 +4,11 @@
 -   clang
 -   halide
 
-
+## ENV
 ```sh
-./local_create.sh
+CONAN_USERNAME=xxxxx # ADJUST WITH YOUR REFERENCE USERNAME!
+CONAN_PASSWORD=xxxxx
+CONAN_UPLOAD=https://conan.sunnycase.moe
 ```
 
 [x] ubuntu18.04 x86_64
