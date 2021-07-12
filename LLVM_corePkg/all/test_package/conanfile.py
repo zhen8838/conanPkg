@@ -8,9 +8,23 @@ class LLVMCoreTestPackageConan(ConanFile):
   generators = ('cmake', 'cmake_find_package', 'cmake_paths')
 
   def build(self):
-    build_system = CMake(self)
-    build_system.configure()
-    build_system.build()
+    test_package = not tools.cross_building(self.settings)
+    if 'x86' not in str(self.settings.arch).lower():
+      test_package = False
+    elif str(self.options['llvm-core'].targets) not in ['all', 'X86']:
+      test_package = False
+    elif self.options['llvm-core'].shared:
+      if self.options['llvm-core'].components != 'all':
+        requirements = ['interpreter', 'irreader', 'x86codegen']
+        targets = str(self.options['llvm-core'].components)
+        if self.settings.os == 'Windows':
+          requirements.append('demangle')
+        if not all([target in components for target in requirements]):
+          test_package = False
+    if test_package:
+      build_system = CMake(self)
+      build_system.configure()
+      build_system.build()
 
   def test(self):
     test_package = not tools.cross_building(self.settings)
@@ -26,7 +40,6 @@ class LLVMCoreTestPackageConan(ConanFile):
           requirements.append('demangle')
         if not all([target in components for target in requirements]):
           test_package = False
-
     if test_package:
       command = [
           os.path.join(self.build_folder, 'bin', 'test_package'),
