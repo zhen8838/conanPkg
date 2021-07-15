@@ -5,8 +5,9 @@ default:
     gcc_versions: 
       - '10'
     apple_clang_versions: 
-      - '11'
-      - '12'
+      - '12.0'
+    visual_versions:
+      - '16'
     cppstds: 
       - 20
     upload_dependencies: all

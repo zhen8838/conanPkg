@@ -1,10 +1,7 @@
 name: build
 
-on: [push, pull_request]
+on: push
 
-env:
-  BUILD_TYPE: Release
-  NNCASE_VERSION_SUFFIX: .dev${{github.run_number}}
 
 jobs:
   build:
@@ -39,9 +36,21 @@ jobs:
         conan config set general.cmake_generator=Ninja
 
     - name: Build Package & Upload
+      if: runner.os == 'Linux'
       shell: bash
       env: 
-        CONAN_USERNAME: zhen8838
+        CC: gcc-10
+        CXX: g++-10
+        CONAN_LOGIN_USERNAME: zhen8838
+        CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+        CONAN_UPLOAD: https://conan.sunnycase.moe
+      run: python build.py
+
+    - name: Build Package & Upload
+      if: runner.os != 'Linux'
+      shell: bash
+      env: 
+        CONAN_LOGIN_USERNAME: zhen8838
         CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
         CONAN_UPLOAD: https://conan.sunnycase.moe
       run: python build.py
